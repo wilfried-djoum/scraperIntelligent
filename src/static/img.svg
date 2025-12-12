@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1428"/>
+      <stop offset="100%" stop-color="#0b0f1a"/>
+    </linearGradient>
+    <style><![CDATA[
+      .card { fill:#121829; stroke:#243046; stroke-width:2; rx:16; }
+      .title { font: 700 32px 'Segoe UI', Arial; fill:#e6e9f0; }
+      .subtitle { font: 400 16px 'Segoe UI', Arial; fill:#9aa3b2; }
+      .h2 { font: 700 22px 'Segoe UI', Arial; fill:#e6e9f0; }
+      .h3 { font: 700 18px 'Segoe UI', Arial; fill:#e6e9f0; }
+      .text { font: 400 14px 'Segoe UI', Arial; fill:#e6e9f0; }
+      .muted { font: 400 14px 'Segoe UI', Arial; fill:#9aa3b2; }
+      .label { font: 600 13px 'Segoe UI', Arial; fill:#9aa3b2; }
+      .input { fill:#0c1224; stroke:#243046; stroke-width:2; rx:10; }
+      .btn { fill:#6c8cff; rx:10; }
+      .btnText { font: 700 14px 'Segoe UI', Arial; fill:#fff; }
+      .chip { fill:#1a2442; stroke:#243046; stroke-width:2; rx:16; }
+      .chipText { font: 500 12px 'Segoe UI', Arial; fill:#e6e9f0; }
+      .score { font: 700 32px 'Segoe UI', Arial; fill:#47d37d; }
+      .mono { font: 400 12px 'Consolas', monospace; fill:#e6e9f0; }
+      .divider { stroke:#243046; stroke-width:2; }
+      .link { font: 400 12px 'Segoe UI', Arial; fill:#6c8cff; }
+      .shadow { filter: drop-shadow(0 10px 30px rgba(0,0,0,0.25)); }
+    ]]></style>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+
+  <!-- Header -->
+  <text x="80" y="80" class="title">Scraper Intelligent</text>
+  <text x="80" y="110" class="subtitle">Analyse de profil (Prénom, Nom, Entreprise) + LinkedIn avancé + Score de fiabilité</text>
+
+  <!-- Form card -->
+  <g class="shadow">
+    <rect x="80" y="140" width="1440" height="160" class="card"/>
+  </g>
+  <text x="110" y="175" class="label">Prénom</text>
+  <rect x="110" y="190" width="420" height="42" class="input"/>
+  <text x="124" y="216" class="muted">Jean</text>
+
+  <text x="560" y="175" class="label">Nom</text>
+  <rect x="560" y="190" width="420" height="42" class="input"/>
+  <text x="574" y="216" class="muted">Dupont</text>
+
+  <text x="1010" y="175" class="label">Entreprise</text>
+  <rect x="1010" y="190" width="420" height="42" class="input"/>
+  <text x="1024" y="216" class="muted">Acme SA</text>
+
+  <rect x="110" y="242" width="220" height="42" class="btn"/>
+  <text x="140" y="270" class="btnText">Lancer l’analyse</text>
+  <text x="350" y="270" class="muted">Analyse en cours...</text>
+
+  <!-- Résultats -->
+  <text x="80" y="340" class="h2">Résultats</text>
+
+  <!-- Colonne gauche: Profil synthétique -->
+  <g class="shadow">
+    <rect x="80" y="360" width="960" height="300" class="card"/>
+  </g>
+  <text x="110" y="392" class="h3">Profil synthétique</text>
+
+  <text x="110" y="420" class="label">Prénom</text><text x="220" y="420" class="text">Jean</text>
+  <text x="110" y="444" class="label">Nom</text><text x="220" y="444" class="text">Dupont</text>
+  <text x="110" y="468" class="label">Entreprise</text><text x="220" y="468" class="text">Acme SA</text>
+  <text x="110" y="492" class="label">Poste actuel</text><text x="220" y="492" class="text">Lead Engineer</text>
+
+  <text x="110" y="520" class="h3">Résumé</text>
+  <text x="110" y="545" class="muted">Ingénieur fullstack IA, spécialisé en scraping, NLP et synthèse de données. Focalisé sur la qualité et la vérifiabilité des sources.</text>
+
+  <text x="110" y="575" class="h3">Compétences</text>
+  <rect x="110" y="590" width="90" height="28" class="chip"/><text x="125" y="610" class="chipText">Python</text>
+  <rect x="210" y="590" width="120" height="28" class="chip"/><text x="225" y="610" class="chipText">FastAPI</text>
+  <rect x="340" y="590" width="120" height="28" class="chip"/><text x="355" y="610" class="chipText">LLM</text>
+  <rect x="470" y="590" width="150" height="28" class="chip"/><text x="485" y="610" class="chipText">Scraping</text>
+  <rect x="630" y="590" width="140" height="28" class="chip"/><text x="645" y="610" class="chipText">NLP</text>
+  <rect x="780" y="590" width="120" height="28" class="chip"/><text x="795" y="610" class="chipText">TypeScript</text>
+
+  <!-- Colonne droite: Score de fiabilité -->
+  <g class="shadow">
+    <rect x="1060" y="360" width="460" height="300" class="card"/>
+  </g>
+  <text x="1090" y="392" class="h3">Score de fiabilité</text>
+  <text x="1090" y="430" class="score">86</text><text x="1135" y="430" class="text">/100</text>
+  <text x="1090" y="460" class="label">Justification (3–6 lignes)</text>
+  <text x="1090" y="482" class="muted">• Diversité de sources: LinkedIn, Site Entreprise, Presse, Réseaux pro.</text>
+  <text x="1090" y="502" class="muted">• Cohérence des informations: intitulés et dates convergents.</text>
+  <text x="1090" y="522" class="muted">• Vérifiabilité: liens accessibles, posts publics disponibles.</text>
+  <text x="1090" y="542" class="muted">• Complétude: expériences, compétences, publications présentes.</text>
+  <text x="1090" y="562" class="muted">• Signaux d’autorité: expertise démontrée dans les posts.</text>
+
+  <!-- Track record (chronologique) -->
+  <g class="shadow">
+    <rect x="80" y="680" width="1440" height="260" class="card"/>
+  </g>
+  <text x="110" y="710" class="h3">Parcours professionnel (Track record)</text>
+  <!-- Expérience 1 -->
+  <text x="110" y="740" class="text"><tspan font-weight="700">Lead Engineer</tspan> — Acme SA</text>
+  <text x="110" y="760" class="muted">2020 → Présent • Missions clés: IA, Scraping, Architecture</text>
+  <text x="110" y="780" class="muted">Réalisations: Pipeline LLM, Dashboard de monitoring</text>
+  <text x="110" y="800" class="muted">Indicateurs: 10k+ données/mois, équipe 6 devs</text>
+  <!-- Expérience 2 -->
+  <text x="520" y="740" class="text"><tspan font-weight="700">Senior Fullstack</tspan> — BetaTech</text>
+  <text x="520" y="760" class="muted">2017 → 2020 • Missions clés: Backend, APIs, CI/CD</text>
+  <text x="520" y="780" class="muted">Réalisations: migration microservices, perf +30%</text>
+  <text x="520" y="800" class="muted">Indicateurs: 100k req/jour, entreprise 200 pers.</text>
+  <!-- Expérience 3 -->
+  <text x="930" y="740" class="text"><tspan font-weight="700">Développeur</tspan> — GammaSoft</text>
+  <text x="930" y="760" class="muted">2015 → 2017 • Missions clés: Front + Intégration</text>
+  <text x="930" y="780" class="muted">Réalisations: refonte UI, accessibilité AA</text>
+  <text x="930" y="800" class="muted">Indicateurs: taille entreprise 50 pers.</text>
+
+  <!-- Analyse LinkedIn avancée -->
+  <g class="shadow">
+    <rect x="80" y="960" width="1440" height="360" class="card"/>
+  </g>
+  <text x="110" y="990" class="h3">Analyse LinkedIn</text>
+
+  <!-- Thématiques récurrentes -->
+  <text x="110" y="1018" class="label">Thématiques récurrentes</text>
+  <rect x="110" y="1034" width="110" height="28" class="chip"/><text x="125" y="1054" class="chipText">Scraping</text>
+  <rect x="230" y="1034" width="80" height="28" class="chip"/><text x="245" y="1054" class="chipText">NLP</text>
+  <rect x="320" y="1034" width="140" height="28" class="chip"/><text x="335" y="1054" class="chipText">LLM prompts</text>
+  <rect x="470" y="1034" width="150" height="28" class="chip"/><text x="485" y="1054" class="chipText">Data quality</text>
+  <rect x="630" y="1034" width="160" height="28" class="chip"/><text x="645" y="1054" class="chipText">Reliability</text>
+
+  <!-- Niveau d’expertise -->
+  <text x="820" y="1018" class="label">Niveau d’expertise</text>
+  <text x="820" y="1048" class="text">Avancé • cas concrets, codes partagés, analyses techniques</text>
+
+  <!-- Signaux d’autorité -->
+  <text x="110" y="1088" class="label">Signaux d’autorité</text>
+  <text x="110" y="1110" class="muted">Ton pro • crédibilité • cohérence • références externes • partages par pairs</text>
+
+  <!-- Engagement (qualitatif) -->
+  <text x="820" y="1088" class="label">Engagement (qualitatif)</text>
+  <text x="820" y="1110" class="muted">Commentaires pertinents, discussions techniques, réactions régulières</text>
+
+  <!-- 10 derniers posts (résumés indépendants) -->
+  <text x="110" y="1148" class="label">10 derniers posts (résumés)</text>
+  <!-- post cards -->
+  <rect x="110" y="1164" width="440" height="70" class="input"/>
+  <text x="124" y="1186" class="text">Post #1 — Résumé LLM; thèmes: NLP, scraping • Lien</text>
+  <text x="124" y="1208" class="muted">Engagement: positif • Signaux: pédagogique, sources</text>
+
+  <rect x="570" y="1164" width="440" height="70" class="input"/>
+  <text x="584" y="1186" class="text">Post #2 — Résumé; thèmes: LLM, fiabilité • Lien</text>
+  <text x="584" y="1208" class="muted">Engagement: stable • Signaux: démonstrations</text>
+
+  <rect x="1030" y="1164" width="440" height="70" class="input"/>
+  <text x="1044" y="1186" class="text">Post #3 — Résumé; thèmes: prompts • Lien</text>
+  <text x="1044" y="1208" class="muted">Engagement: variable • Signaux: cas d’usage</text>
+
+  <rect x="110" y="1244" width="440" height="70" class="input"/>
+  <text x="124" y="1266" class="text">Post #4 — Résumé • Lien</text>
+  <text x="124" y="1288" class="muted">Engagement: positif</text>
+
+  <rect x="570" y="1244" width="440" height="70" class="input"/>
+  <text x="584" y="1266" class="text">Post #5 — Résumé • Lien</text>
+  <text x="584" y="1288" class="muted">Engagement: stable</text>
+
+  <rect x="1030" y="1244" width="440" height="70" class="input"/>
+  <text x="1044" y="1266" class="text">Post #6 — Résumé • Lien</text>
+  <text x="1044" y="1288" class="muted">Engagement: variable</text>
+
+  <rect x="110" y="1324" width="440" height="70" class="input"/>
+  <text x="124" y="1346" class="text">Post #7 — Résumé • Lien</text>
+  <text x="124" y="1368" class="muted">Engagement: positif</text>
+
+  <rect x="570" y="1324" width="440" height="70" class="input"/>
+  <text x="584" y="1346" class="text">Post #8 — Résumé • Lien</text>
+  <text x="584" y="1368" class="muted">Engagement: stable</text>
+
+  <rect x="1030" y="1324" width="440" height="70" class="input"/>
+  <text x="1044" y="1346" class="text">Post #9 — Résumé • Lien</text>
+  <text x="1044" y="1368" class="muted">Engagement: variable</text>
+
+  <rect x="110" y="1404" width="440" height="70" class="input"/>
+  <text x="124" y="1426" class="text">Post #10 — Résumé • Lien</text>
+  <text x="124" y="1448" class="muted">Engagement: positif</text>
+
+  <!-- Réputation (commentaires/interactions) -->
+  <g class="shadow">
+    <rect x="80" y="1440" width="1440" height="240" class="card"/>
+  </g>
+  <text x="110" y="1470" class="h3">Réputation professionnelle (Commentaires &amp; interactions)</text>
+  <text x="110" y="1500" class="label">Qualité des échanges</text>
+  <text x="110" y="1520" class="muted">Argumentation claire, références, respect des contradicteurs</text>
+
+  <text x="560" y="1500" class="label">Reconnaissance par les pairs</text>
+  <text x="560" y="1520" class="muted">Partages par experts, mentions, réponses positives</text>
+
+  <text x="1010" y="1500" class="label">Ton &amp; pertinence</text>
+  <text x="1010" y="1520" class="muted">Ton professionnel, précision technique, exemples concrets</text>
+
+  <text x="110" y="1550" class="label">Points forts</text>
+  <text x="110" y="1570" class="muted">Clarté • pédagogie • transparence des sources • constance</text>
+
+  <text x="560" y="1550" class="label">Signaux faibles / incohérences</text>
+  <text x="560" y="1570" class="muted">Quelques posts sans liens sources • variation du ton</text>
+
+  <!-- Publications & Coordonnées -->
+  <g class="shadow">
+    <rect x="80" y="1700" width="700" height="260" class="card"/>
+  </g>
+  <text x="110" y="1730" class="h3">Publications</text>
+  <text x="110" y="1760" class="text">• Medium: 5 articles</text>
+  <text x="110" y="1785" class="text">• GitHub: 12 repos publics</text>
+  <text x="110" y="1810" class="text">• Conférences: 2 talks</text>
+  <text x="110" y="1835" class="text">• Podcast: 1 épisode</text>
+
+  <g class="shadow">
+    <rect x="820" y="1700" width="700" height="260" class="card"/>
+  </g>
+  <text x="850" y="1730" class="h3">Coordonnées professionnelles</text>
+  <text x="850" y="1760" class="text">• Email: jean.dupont@acme.com</text>
+  <text x="850" y="1785" class="text">• LinkedIn: /in/jean-dupont</text>
+  <text x="850" y="1810" class="text">• Site: acme.com/team/jean-dupont</text>
+  <text x="850" y="1835" class="text">• Twitter/X: @jdupont</text>
+
+  <!-- JSON brut -->
+  <g class="shadow">
+    <rect x="80" y="1980" width="1440" height="220" class="card"/>
+  </g>
+  <text x="110" y="2010" class="h3">JSON brut (réponse API)</text>
+  <rect x="110" y="2030" width="1400" height="150" class="input"/>
+  <text x="120" y="2050" class="mono">{ "first_name": "Jean", "last_name": "Dupont", "company": "Acme SA", "experiences": [...], "linkedin_posts": [...], "reputation": {...}, "reliability": {...} }</text>
+</svg>

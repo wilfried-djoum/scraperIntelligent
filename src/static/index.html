@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Scraper Intelligent - Profiling</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Scraper Intelligent</h1>
+            <p>Analyse de profil (Prénom, Nom, Entreprise)</p>
+        </header>
+
+        <section class="card">
+            <form id="profiling-form">
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="first_name">Prénom</label>
+                        <input id="first_name" name="first_name" type="text" placeholder="Jean" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Nom</label>
+                        <input id="last_name" name="last_name" type="text" placeholder="Dupont" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Entreprise</label>
+                        <input id="company" name="company" type="text" placeholder="Acme SA" />
+                    </div>
+                </div>
+                <button type="submit" class="btn">Lancer l’analyse</button>
+            </form>
+            <div id="status" class="status"></div>
+        </section>
+
+        <section id="results" class="results hidden">
+            <h2>Résultats</h2>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Profil synthétique</h3>
+                    <div class="kv">
+                        <div><span>Prénom:</span><span id="r-first">Jean</span></div>
+                        <div><span>Nom:</span><span id="r-last">Serge</span></div>
+                        <div><span>Entreprise:</span><span id="r-company">THALES</span></div>
+                        <div><span>Poste actuel:</span><span id="r-role">CEO</span></div>
+                    </div>
+                    <div>
+                        <h4>Résumé</h4>
+                        <p id="r-summary" class="muted">Lorem ipsum dolor sit amet consectetur adipisicing elit. Eum
+                            explicabo nihil nostrum minus, cupiditate fugiat quis ex vel atque et nulla natus nesciunt
+                            sint autem reiciendis rem nam minima tempore!</p>
+                    </div>
+                    <div>
+                        <h4>Compétences</h4>
+                        <ul id="r-skills" class="tags">
+                            <li>JavaScript</li>
+                            <li>Python</li>
+                            <li>Scraping</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Score de fiabilité</h3>
+                    <div class="score">
+                        <span id="r-score">—</span>/100
+                    </div>
+                    <p id="r-score-justif" class="muted">
+                        Justification (3–6 lignes)
+                    <ul class="muted-list">
+                        <li>Diversité de sources: LinkedIn, Site Entreprise, Presse, Réseaux pro.</li>
+                        <li>Cohérence des informations: intitulés et dates convergents.</li>
+                        <li>Vérifiabilité: liens accessibles, posts publics disponibles.</li>
+                        <li>Complétude: expériences, compétences, publications présentes.</li>
+                        <li>Signaux d’autorité: expertise démontrée dans les posts.</li>
+                    </ul>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Parcours professionnel</h3>
+                <div id="r-experiences" class="timeline">
+                    <div class="exp">Développeur React</div>
+                    <div class="exp">Développeur Angular</div>
+                    <div class="exp">Développeur Java</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Analyse LinkedIn</h3>
+                <h4>Thématiques et posts récents</h4>
+                <div id="r-posts" class="posts">
+                    <div class="post">
+                        <div>Comment mettre sur pied une API rapidement</div>
+                        <div class="meta">Premierement il faut configurer l'environnement</div>
+                    </div>
+                    <div class="post">
+                        <div>Comment mettre sur pied une API rapidement</div>
+                        <div class="meta">Premierement il faut configurer l'environnement</div>
+                    </div>
+                    <div class="post">
+                        <div>Comment mettre sur pied une API rapidement</div>
+                        <div class="meta">Premierement il faut configurer l'environnement</div>
+                    </div>
+                </div>
+                <h4>Réputation professionnelle</h4>
+                <div id="r-reputation" class="kv">
+                    <span>Je ne suis pas du quartier</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Publications & Coordonnées</h3>
+                <ul id="r-publications" class="list">
+                    <li>Voici venue toutes les publications nécessaires pour ce poste</li>
+                    <li>Voici venue toutes les publications nécessaires pour ce poste</li>
+                    <li>Voici venue toutes les publications nécessaires pour ce poste</li>
+                </ul>
+                <ul id="r-contacts" class="list">
+                    <li>Contactez Wilfried-Djoum</li>
+                    <li>Contactez Wilfried-Djoum</li>
+                    <li>Contactez Wilfried-Djoum</li>
+                </ul>
+            </div>
+
+            <details class="card">
+                <summary>JSON brut</summary>
+                <pre id="raw-json"></pre>
+            </details>
+        </section>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
