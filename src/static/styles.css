@@ -97,9 +97,9 @@ header p {
     font-size: 12px;
 }
 
-/* .hidden {
+.hidden {
     display: none;
-} */
+}
 
 .kv div {
     display: grid;
