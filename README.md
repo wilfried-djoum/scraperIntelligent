@@ -2,339 +2,87 @@
 
 API de profiling professionnel intelligent combinant web scraping et analyse LLM.
 
-### 1. Démo Fonctionnelle
+## Démarrage Rapide
 
-**Exécution en local:**
 ```bash
-# Cloner le repository
-git clone <repo-url>
-cd ScraperIntelligent
-
-# Installer les dépendances
+# Installation
 pip install -r requirements.txt
 
-# Configurer les variables d'environnement
-# Créer un fichier .env à la racine avec:
-# FIRECRAWL_API_KEY=votre_clé
-# OPENAI_API_KEY=votre_clé
+# Configuration (.env)
+FIRECRAWL_API_KEY=votre_clé
+OPENAI_API_KEY=votre_clé
 
-# Lancer l'application
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-
-# Accéder à l'interface web
-# http://localhost:8000/static/index.html
+# Lancement
+uvicorn main:app --reload --port 8000
 ```
 
-### 2. Code Propre et Structuré
+**Endpoints :** `http://localhost:8000/docs` | `http://localhost:8000/static/index.html`
 
-**Qualité du code:**
-- ✓ Architecture modulaire (Orchestrator pattern)
-- ✓ Séparation des responsabilités (services, models, config)
-- ✓ Main.py réduit de 82% (340 → 59 lignes)
-- ✓ Commentaires docstrings sur toutes les fonctions publiques
-- ✓ Type hints Python (Pydantic models)
-- ✓ Configuration centralisée (.env + config.py)
-- ✓ Gestion d'erreurs cohérente
-
-**Standards suivis:**
-- PEP 8 (formatting Python)
-- Single Responsibility Principle
-- DRY (Don't Repeat Yourself) via BaseScraper
-- Dependency Injection (config singleton)
-
-### 3. Documentation Technique
-
-**Couverture:**
-- ✓ Architecture système (patterns, flux de données)
-- ✓ Choix techniques justifiés (Firecrawl, OpenAI, FastAPI)
-- ✓ Limites actuelles documentées
-- ✓ Pistes d'amélioration priorisées
 ---
 
-## Architecture Refactorisée
+## Architecture
 
-### Structure du Projet
+**Pattern : Orchestrator**
+- `ProfileOrchestrator` : coordonne le workflow (scraping → extraction → scoring → assemblage)
+- `BaseScraper` : classe de base pour tous les scrapers (Firecrawl v2)
+- `LLMAnalyzer` : service d'analyse via OpenAI
+- `ReliabilityScorer` : calcul du score de fiabilité (0-100)
 
+**Structure modulaire :**
 ```
-ScraperIntelligent/
-├── main.py                          # Point d'entrée FastAPI (60 lignes)
-├── requirements.txt
-├── src/
-│   ├── config.py                    # Configuration centralisée
-│   ├── models/
-│   │   └── profile.py               # Modèles Pydantic
-│   ├── services/
-│   │   ├── base_scraper.py          # Classe de base pour scrapers
-│   │   ├── profile_orchestrator.py  # Orchestration du workflow
-│   │   ├── llm_analyzer.py          # Service LLM OpenAI
-│   │   ├── scoring.py               # Calcul du score de fiabilité
-│   │   └── sources/
-│   │       ├── linkedin.py          # Scraper LinkedIn
-│   │       ├── company.py           # Scraper sites entreprise
-│   │       ├── news.py              # Scraper presse
-│   │       └── social.py            # Scraper réseaux sociaux
-│   └── static/
-│       ├── index.html
-│       ├── main.js
-│       └── styles.css
+src/
+├── config.py                    # Configuration centralisée
+├── models/profile.py            # Modèles Pydantic
+├── services/
+│   ├── profile_orchestrator.py  # Orchestration du workflow
+│   ├── llm_analyzer.py          # Service LLM OpenAI
+│   ├── scoring.py               # Calcul du score
+│   └── sources/                 # Scrapers (LinkedIn, Company, News, Social)
 ```
 
-## Améliorations du Refactoring
+## Choix Techniques
 
-### 1. Configuration Centralisée (`src/config.py`)
-- Toutes les clés API dans un seul endroit
-- Variables d'environnement avec valeurs par défaut
-- Configuration Firecrawl (version, timeout, wait_for)
-- Configuration OpenAI (model, temperature, max_tokens)
-- Paramètres de scraping (retries, max posts, etc.)
+| Composant | Technologie | Justification |
+|-----------|-------------|---------------|
+| **Backend** | FastAPI | Performance async, documentation auto, type hints |
+| **Scraping** | Firecrawl v2 | API managée, JS rendering, pas de maintenance browser |
+| **LLM** | OpenAI gpt-4o-mini | Coût optimisé (5-10x vs GPT-4), latence ~2s, fallback sur knowledge base |
+| **Scoring** | Règles métier | 0-100 basé sur sources (40 pts) + complétude (60 pts) |
 
-### 2. Classe de Base `BaseScraper` (`src/services/base_scraper.py`)
-- Factorisation de l'initialisation Firecrawl
-- Gestion SSL/CA bundle centralisée
-- Méthodes helper pour extraction sûre (markdown, html, metadata)
-- Méthode `_scrape_url()` générique
-- Logs cohérents
-
-### 3. Orchestrateur `ProfileOrchestrator` (`src/services/profile_orchestrator.py`)
-- Extraction de toute la logique métier hors de main.py
-- Workflow découpé en méthodes privées claires:
-  - `_scrape_all_sources()` - Lance les scrapers
-  - `_extract_profile_data()` - Extrait et structure les données
-  - `_calculate_reliability()` - Calcule le score
-  - `_assemble_profile()` - Assemble le profil final
-- Séparation des préoccupations (scraping / extraction / enrichissement / scoring)
-- Testabilité améliorée
-
-### 4. Main.py Simplifié
-- Réduit de ~340 lignes à 60 lignes (-82%)
-- Responsabilité unique: routing FastAPI
-- Délégation complète à l'orchestrateur
-- Documentation API améliorée
-
-## Installation
-
-```bash
-# Cloner le repo
-cd ScraperIntelligent
-
-# Installer les dépendances
-pip install -r requirements.txt
-
-# Configurer les variables d'environnement (optionnel)
-cp .env.example .env
-# Éditer .env avec vos clés API
-```
-
-## Configuration
-
-### Variables d'Environnement
-
-Créer un fichier `.env` à la racine:
-
-```env
-# API Keys
-FIRECRAWL_API_KEY=your_firecrawl_key
-OPENAI_API_KEY=your_openai_key
-
-# Firecrawl Settings
-FIRECRAWL_TIMEOUT=30
-FIRECRAWL_WAIT_FOR=3000
-
-# OpenAI Settings
-OPENAI_MODEL=gpt-4o-mini
-```
-
-Les clés sont également hardcodées dans `src/config.py` pour le développement (à retirer en production).
-
-## Lancement
-
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-API accessible sur:
-- Interface Web: http://localhost:8000/static/index.html
-- API Docs: http://localhost:8000/docs
-- Endpoint profiling: POST http://localhost:8000/profiling/
-
-## Usage de l'API
-
-### Endpoint `/profiling/`
-
-**Request:**
-```json
-POST /profiling/
-{
-    "first_name": "Satya",
-    "last_name": "Nadella",
-    "company": "Microsoft"
-}
-```
-
-**Response:**
-```json
-{
-    "debug": {
-        "sources_used": ["linkedin", "company", "news", "social"],
-        "processing_time": "34.2s"
-    },
-    "profile": {
-        "first_name": "Satya",
-        "last_name": "Nadella",
-        "company": "Microsoft",
-        "headline": "CEO at Microsoft",
-        "summary": "...",
-        "current_role": "Chief Executive Officer",
-        "experiences": [...],
-        "skills": [...],
-        "education": [...],
-        "publications": [...],
-        "linkedin_analysis": {...},
-        "contact_info": {...},
-        "reliability": {
-            "score": 85,
-            "justification": "...",
-            "factors": [...]
-        },
-        "reputation": {...},
-        "sources_used": [...]
-    }
-}
-```
-
-## 🔧 Choix Techniques
-
-### Framework Backend: FastAPI
-**Pourquoi FastAPI?**
-- Performance élevée (basé sur Starlette + Pydantic)
-- Documentation API automatique (Swagger UI)
-- Type safety native avec Python type hints
-- Async/await pour I/O non-bloquant
-- Facilité de déploiement
-
-### Scraping: Firecrawl v2
-**Pourquoi Firecrawl?**
-- API managée (pas de maintenance de navigateurs headless)
-- Support JavaScript rendering
-- Rate limiting géré côté serveur
-- Extraction markdown/html structurée
-- Alternative à Selenium/Playwright plus simple
-
-### LLM: OpenAI gpt-4o-mini
-**Pourquoi gpt-4o-mini?**
-- Coût optimisé (5-10x moins cher que GPT-4)
-- Latence réduite (~2-3s par requête)
-- Capacités de structuration suffisantes
-- Fallback sur knowledge base (Oct 2023)
-- Alternative: Claude-3.5-Sonnet, Mistral, Llama-3
-
-### Architecture: Orchestrator Pattern
-**Pourquoi ce pattern?**
-- Séparation claire des responsabilités
-- Workflow complexe coordonné (4 scrapers → extraction → LLM → scoring)
-- Testabilité (chaque service isolé)
+**Workflow LLM (5 utilisations) :**
+1. Extraction structurée du contenu scrapé
+2. Analyse des posts LinkedIn
+3. Synthèse narrative du profil
+4. Justification du score de fiabilité
+5. Enrichissement via knowledge base (fallback Oct 2023)
 - Évolutivité (ajout de nouvelles sources facile)
 
 ### Frontend: Vanilla JS
 **Pourquoi pas React/Vue?**
 - Pas de build step nécessaire
 - Déploiement statique simple
-- Overhead minimal pour une SPA simple
-- Chargement instantané
+## Limites & Améliorations
 
-## Points Techniques Importants
+### Limites Actuelles
 
-### Firecrawl v2
-Tous les scrapers utilisent maintenant Firecrawl v2:
-```python
-self.firecrawl = FirecrawlApp(api_key=config.FIRECRAWL_API_KEY, version="v2")
-result = self.firecrawl.scrape_url(url, formats=["markdown"], onlyMainContent=True)
-markdown = getattr(result, 'markdown', '')  # Accès via attributs, pas dict
-```
+| Problème | Impact | Workaround |
+|----------|--------|------------|
+| **LinkedIn bloqué** | 403 Forbidden (Cloudflare/CAPTCHA) | Enrichissement LLM fallback (données Oct 2023) |
+| **LLM daté** | gpt-4o-mini coupure Oct 2023 | Scraping web source primaire |
+| **Performance** | 30-45s par profil (4 scrapers + 5 LLM) | Loader animé + parallélisation (roadmap) |
+| **Rate limiting** | Quotas Firecrawl/OpenAI | Cache Redis (roadmap) |
+| **Fragilité scraping** | Sites changent leur structure | Logs + monitoring + retry logic |
 
-### OpenAI LLM
-- Modèle: **gpt-4o-mini** (coupure octobre 2023)
-- Utilisations:
-  1. `clean_and_structure()` - Extraction structurée du contenu scrapé
-  2. `summarize_posts()` - Analyse des posts LinkedIn
-  3. `global_synthesis()` - Synthèse narrative du profil
-  4. `justify_reliability()` - Justification du score
-  5. `enrich_from_knowledge()` - **Fallback** si scraping échoue (données 2023 uniquement)
+### Pistes d'Amélioration
 
-### Score de Fiabilité
-- Base 0-100
-- **Sources** (max 40 pts): +10 par source (LinkedIn/Company/News/Social)
-- **Complétude** (max 60 pts): headline(8), summary(10), experiences(12), publications(8), posts(8), education(6), skills(4), social(4)
-- Pénalité si données LLM avec faible confiance
+**Priorité HAUTE :**
+- [ ] Parallélisation scrapers (`asyncio.gather()`) → -50% temps réponse
+- [ ] Cache Redis (TTL 24h) → -90% coûts API
+- [ ] Tests unitaires (coverage 80%+) + CI/CD
 
-## Limites Actuelles
-
-### 1. Scraping LinkedIn
-**Problème:** 403 Forbidden pour la plupart des profils publics  
-**Cause:** Anti-scraping agressif de LinkedIn (Cloudflare, CAPTCHA)  
-**Impact:** Données LinkedIn limitées ou absentes  
-**Workaround:** Enrichissement LLM fallback (données Oct 2023)
-
-### 2. Connaissance LLM Datée
-**Problème:** gpt-4o-mini coupure octobre 2023  
-**Cause:** Limitation intrinsèque du modèle  
-**Impact:** Informations récentes (2024-2025) non disponibles via fallback  
-**Workaround:** Scraping web reste la source primaire
-
-### 3. Fragilité du Scraping HTML
-**Problème:** Sites peuvent changer leur structure  
-**Cause:** Pas d'API officielle, parsing HTML  
-**Impact:** Scrapers peuvent casser sans préavis  
-**Workaround:** Logs détaillés + monitoring + retry logic
-
-### 4. Rate Limiting
-**Problème:** Firecrawl et OpenAI ont des quotas  
-**Cause:** Plans API limités  
-**Impact:** Erreurs 429 en production haute charge  
-**Workaround:** Cache Redis + backoff exponentiel (roadmap)
-
-### 5. Performance
-**Problème:** Temps de réponse 30-45s par profil  
-**Cause:** 4 scrapers séquentiels + 5 appels LLM  
-**Impact:** UX dégradée pour l'utilisateur  
-**Workaround:** Loader animé + parallélisation (roadmap)
-
-## Pistes d'Amélioration
-
-**Priorité HAUTE:**
-- [ ] **Parallélisation des scrapers** → Réduire temps à ~15-20s
-  - Utiliser `asyncio.gather()` pour scrapers indépendants
-  - Gains: 50% temps de réponse
-
-- [ ] **Cache Redis** → Éviter re-scraping
-  - TTL 24h pour profils
-  - Gains: 90% réduction coûts API
-
-- [ ]**Tests unitaires** → Garantir stabilité
-  - Coverage 80%+ sur services
-  - CI/CD avec GitHub Actions
-
-**Priorité MOYENNE:**
-- [ ] **Retry automatique** → Resilience
-  - Backoff exponentiel (1s, 2s, 4s)
-  - Circuit breaker pattern
-
-- [ ] **Logging structuré** → Debuggabilité
-  - JSON logs avec contexte
-  - Agrégation Datadog/Sentry
-
-### Test Manuel Rapide
-```bash
-# Lancer un test avec une personnalité publique connue
-curl -X POST http://localhost:8000/profiling/ \
-  -H "Content-Type: application/json" \
-  -d '{"first_name": "Satya", "last_name": "Nadella", "company": "Microsoft"}'
-
-# Résultat attendu: Score 70-90/100, données partielles (LinkedIn bloqué)
-```
-
-### Tests Unitaires (À venir)
-```bash
-pip install pytest pytest-asyncio pytest-cov
-pytest tests/ --cov=src --cov-report=html
-```
+**Priorité MOYENNE :**
+- [ ] Retry automatique + backoff exponentiel
+- [ ] Logging structuré (JSON) + Sentry/Datadog*Backend** | FastAPI | Performance async, documentation auto, type hints |
+| **Scraping** | Firecrawl v2 | API managée, JS rendering, pas de maintenance browser |
+| **LLM** | OpenAI gpt-4o-mini | Coût optimisé (5-10x vs GPT-4), latence ~2s, fallback sur knowledge base |
+| **Scoring** | Règles métier | 0-100 basé sur sources (40 pts) + complétude (60 pts) |
