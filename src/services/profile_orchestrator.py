@@ -36,17 +36,30 @@ class ProfileOrchestrator:
 
     async def create_profile(self, data: BaseProfile) -> Dict[str, Any]:
         """
-        Crée un profil enrichi complet
+        Crée un profil enrichi complet via workflow orchestré
+        
+        Workflow en 5 phases:
+        1. Scraping multi-sources (LinkedIn, Company, News, Social)
+        2. Extraction et structuration des données (avec LLM)
+        3. Enrichissement des champs manquants (fallback LLM)
+        4. Calcul du score de fiabilité (0-100)
+        5. Assemblage du profil final
 
         Args:
             data: BaseProfile avec first_name, last_name, company
 
         Returns:
-            Dict avec debug et profile enrichi
+            Dict {
+                "debug": {"sources_used": [...], "processing_time": "42s"},
+                "profile": EnrichedProfile {...}
+            }
+            
+        Raises:
+            Exception: Si toutes les sources de scraping échouent
         """
         start = time.time()
 
-        # 1. Scraper toutes les sources
+        # PHASE 1: Scraper toutes les sources en parallèle (40-50s)
         scraping_results = await self._scrape_all_sources(data)
 
         # 2. Extraire et enrichir les données

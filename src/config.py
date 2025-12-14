@@ -11,9 +11,23 @@ load_dotenv(find_dotenv())
 
 
 class Config:
-    """Configuration globale de l'application"""
+    """
+    Configuration globale de l'application
+    
+    Charge les variables d'environnement depuis .env via python-dotenv.
+    Toutes les clés API doivent être définies dans .env pour éviter les hardcoded secrets.
+    
+    Variables requises:
+        - FIRECRAWL_API_KEY: Clé API pour Firecrawl (web scraping)
+        - OPENAI_API_KEY: Clé API pour OpenAI GPT (LLM)
+    
+    Variables optionnelles:
+        - FIRECRAWL_TIMEOUT: Timeout scraping en secondes (défaut: 30)
+        - FIRECRAWL_WAIT_FOR: Attente JS rendering en ms (défaut: 3000)
+        - OPENAI_MODEL: Modèle LLM à utiliser (défaut: gpt-4o-mini)
+    """
 
-    # APsIGATOIRE)
+    # API Keys (OBLIGATOIRES - charger depuis .env)
     FIRECRAWL_API_KEY: str = os.getenv("FIRECRAWL_API_KEY") or ""
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY") or ""
     

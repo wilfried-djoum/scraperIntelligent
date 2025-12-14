@@ -35,7 +35,37 @@
             </form>
             <div id="status" class="status"></div>
         </section>
-
+        <!-- Loader animé -->
+        <div id="loader" class="loader-overlay hidden">
+            <div class="loader-content">
+                <div class="spinner">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-core"></div>
+                </div>
+                <h3 class="loader-title">Analyse en cours...</h3>
+                <p class="loader-subtitle" id="loader-text">Scraping des sources multiples</p>
+                <div class="loader-steps">
+                    <div class="step" id="step-linkedin">
+                        <span class="step-icon">⏳</span>
+                        <span>LinkedIn</span>
+                    </div>
+                    <div class="step" id="step-company">
+                        <span class="step-icon">⏳</span>
+                        <span>Entreprise</span>
+                    </div>
+                    <div class="step" id="step-news">
+                        <span class="step-icon">⏳</span>
+                        <span>Actualités</span>
+                    </div>
+                    <div class="step" id="step-social">
+                        <span class="step-icon">⏳</span>
+                        <span>Réseaux sociaux</span>
+                    </div>
+                </div>
+            </div>
+        </div>
         <section id="results" class="results hidden">
             <h2>Résultats</h2>
 
@@ -69,10 +99,8 @@
                     <div class="score">
                         <span id="r-score">—</span>/100
                     </div>
-                    <p id="r-score-justif" class="muted">
-                    <ul class="muted-list">
+                    <ul id="r-score-justif" class="justification-list">
                     </ul>
-                    </p>
                 </div>
             </div>
 
@@ -108,18 +136,26 @@
                 </div>
             </div>
 
-            <div class="card">
-                <h3>Publications & Coordonnées</h3>
-                <ul id="r-publications" class="list">
-                    <li>Voici venue toutes les publications nécessaires pour ce poste</li>
-                    <li>Voici venue toutes les publications nécessaires pour ce poste</li>
-                    <li>Voici venue toutes les publications nécessaires pour ce poste</li>
-                </ul>
-                <ul id="r-contacts" class="list">
-                    <li>Contactez Wilfried-Djoum</li>
-                    <li>Contactez Wilfried-Djoum</li>
-                    <li>Contactez Wilfried-Djoum</li>
-                </ul>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>📰 Publications & Mentions</h3>
+                    <div id="r-publications" class="publications-list">
+                        <div class="publication-item">
+                            <span class="pub-icon">📄</span>
+                            <a href="#" target="_blank">Article example</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📞 Coordonnées publiques</h3>
+                    <div id="r-contacts" class="contacts-grid">
+                        <div class="contact-item">
+                            <span class="contact-icon">🔗</span>
+                            <a href="#" target="_blank">LinkedIn</a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <details class="card">
