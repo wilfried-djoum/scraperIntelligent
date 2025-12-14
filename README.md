@@ -312,7 +312,6 @@ markdown = getattr(result, 'markdown', '')  # Accès via attributs, pas dict
 
 ## Pistes d'Amélioration
 
-### Court Terme (1-2 semaines)
 **Priorité HAUTE:**
 - [ ] **Parallélisation des scrapers** → Réduire temps à ~15-20s
   - Utiliser `asyncio.gather()` pour scrapers indépendants
@@ -322,7 +321,7 @@ markdown = getattr(result, 'markdown', '')  # Accès via attributs, pas dict
   - TTL 24h pour profils
   - Gains: 90% réduction coûts API
 
-- [ ] **Tests unitaires** → Garantir stabilité
+- [ ]**Tests unitaires** → Garantir stabilité
   - Coverage 80%+ sur services
   - CI/CD avec GitHub Actions
 
@@ -334,45 +333,6 @@ markdown = getattr(result, 'markdown', '')  # Accès via attributs, pas dict
 - [ ] **Logging structuré** → Debuggabilité
   - JSON logs avec contexte
   - Agrégation Datadog/Sentry
-
-### Moyen Terme (1-2 mois)
-**Fonctionnalités:**
-- [ ] **API de recherche temps réel** → Données fraîches
-  - Intégration Tavily/Perplexity
-  - Données post-Oct 2023
-
-- [ ] **Webhooks** → Async profiling
-  - Callback URL fournie par client
-  - Profiling en arrière-plan
-
-- [ ] **Multi-profils batch** → Scalabilité
-  - Upload CSV → API traite liste
-  - Rate limiting intelligent
-
-**Infrastructure:**
-- [ ] **Monitoring** → Observabilité
-  - Prometheus + Grafana
-  - Alerting Slack/PagerDuty
-
-- [ ] **Rate limiting par IP** → Protection
-  - SlowAPI middleware
-  - Quotas par tier (free/pro)
-
-### Long Terme (3-6 mois)
-**R&D:**
-- [ ] **Fine-tuning LLM** → Précision
-  - Dataset propriétaire de profils
-  - Modèle spécialisé extraction
-
-- [ ] **Graph database** → Relations
-  - Neo4j pour liens entre profils
-  - Analyse réseau
-
-- [ ] **Computer Vision** → OCR certificats
-  - Extraction diplômes/certificats PDF
-  - Validation automatique
-
-## Tests
 
 ### Test Manuel Rapide
 ```bash
