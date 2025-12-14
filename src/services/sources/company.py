@@ -1,37 +1,36 @@
-import os
-from firecrawl import FirecrawlApp
 from typing import Dict, Any, List
 import asyncio
+import re
+from src.services.base_scraper import BaseScraper
 
 
-class CompanyScraper:
+class CompanyScraper(BaseScraper):
     """Scraper pour les informations d'entreprise"""
 
     def __init__(self):
-        try:
-            self.firecrawl = FirecrawlApp(api_key="fc-56bf239c38ed4a1b820ffa50eb758eae", version="v2")
-            print("Firecrawl v2 enabled for CompanyScraper")
-        except Exception:
-            self.firecrawl = FirecrawlApp(api_key="fc-56bf239c38ed4a1b820ffa50eb758eae")
-            print("Firecrawl default version for CompanyScraper")
+        super().__init__(scraper_name="CompanyScraper")
 
     async def scrape(self, profile) -> Dict[str, Any]:
         """Scrape les infos de l'entreprise"""
 
         try:
-            # 1. Trouver le site web de l'entreprise
+            # Trouver le site web de l'entreprise
             company_url = await self._find_company_website(profile.company)
 
             if not company_url:
                 return {"error": "Site d'entreprise non trouvé"}
 
-            # 2. Découvrir et scraper pages clés (About, Leadership, Press)
+            # Découvrir et scraper pages clés (About, Leadership, Press)
             pages = await self._discover_related_pages(company_url)
             company_info = await self._scrape_company_info(company_url)
 
-            # 3. Chercher et extraire le profil détaillé de la personne
-            person_mentions = await self._find_person_on_site(company_url, profile.getFullName())
-            person_profile = await self._extract_person_profile(company_url, pages, profile.getFullName())
+            # Chercher et extraire le profil détaillé de la personne
+            person_mentions = await self._find_person_on_site(
+                company_url, profile.getFullName()
+            )
+            person_profile = await self._extract_person_profile(
+                company_url, pages, profile.getFullName()
+            )
 
             return {
                 "company_website": company_url,
@@ -55,48 +54,68 @@ class CompanyScraper:
                 f"https://www.google.com/search?q={search_query.replace(' ', '+')}"
             )
 
-            result = self.firecrawl.scrape_url(
-                search_url, params={"formats": ["markdown"]}
-            )
+            result = self.firecrawl.scrape_url(search_url, formats=["markdown"])
 
-            content = result.get("markdown", "")
+            content = getattr(result, "markdown", "") if result else ""
 
             # Extraire les domaines, classer et filtrer
             import re
 
-            domains = re.findall(r"https?://(?:www\.)?([a-zA-Z0-9-]+\.[a-z]{2,})", content)
+            # Pattern plus strict pour capturer seulement les vrais domaines
+            domains = re.findall(
+                r"https?://(?:www\.)?([a-zA-Z0-9-]+\.[a-z]{2,}(?:/|$|\s))", content
+            )
             excluded = [
-                "linkedin.com",
-                "facebook.com",
-                "twitter.com",
+                "google",
+                "bing",
+                "yahoo",
+                "duckduckgo",
+                "linkedin",
+                "facebook",
+                "twitter",
                 "x.com",
-                "instagram.com",
-                "youtube.com",
-                "google.com",
-                "bing.com",
-                "yahoo.com",
-                "duckduckgo.com",
+                "instagram",
+                "youtube",
+                "wikipedia",
+                "reddit",
             ]
 
-            # Rank by containing company name and exclude known search engines/socials
-            company_key = company_name.lower().replace(" ", "")
+            # Classement par nom d'entreprise inclus, à l'exclusion des moteurs de recherche et réseaux sociaux connus.
+            company_key = company_name.lower().replace(" ", "").replace("-", "")
             candidates = []
             for d in domains:
-                dl = d.lower()
+                dl = d.lower().strip("/").strip()
+                # Exclure complètement si contient un mot banni
                 if any(ex in dl for ex in excluded):
                     continue
+                # Vérifier que c'est un domaine valide (au moins 2 parties)
+                parts = dl.split(".")
+                if len(parts) < 2:
+                    continue
                 score = 0
-                if company_key and company_key in dl.replace("-", "").replace("_", ""):
+                # Bonus si contient le nom de l'entreprise
+                if company_key and company_key in dl.replace("-", "").replace(
+                    "_", ""
+                ).replace(".", ""):
+                    score += 3
+                # Préférer les domaines apex (pas de subdomain)
+                if len(parts) == 2:
                     score += 2
-                # prefer apex domains over subdomains
-                if dl.count(".") == 1:
+                # Préférer .com/.fr/.net
+                if parts[-1] in ["com", "fr", "net", "org"]:
                     score += 1
-                candidates.append((score, d))
+                candidates.append((score, dl))
 
             candidates.sort(reverse=True)
-            if candidates:
+            if candidates and candidates[0][0] > 0:
                 best = candidates[0][1]
-                return f"https://{best}"
+                # Nettoyer et retourner
+                return f"https://{best.strip('/')}"
+
+            # Fallback: essayer de construire le domaine à partir du nom d'entreprise
+            if company_name:
+                clean = company_name.lower().replace(" ", "").replace("-", "")
+                return f"https://{clean}.com"
 
             return None
 
@@ -110,11 +129,11 @@ class CompanyScraper:
         try:
             # Scraper la page d'accueil
             result = self.firecrawl.scrape_url(
-                base_url, params={"formats": ["markdown", "html"], "onlyMainContent": False}
+                base_url, formats=["markdown", "html"], onlyMainContent=False
             )
 
-            content = result.get("markdown", "")
-            html = result.get("html", "")
+            content = getattr(result, "markdown", "") if result else ""
+            html = getattr(result, "html", "") if result else ""
 
             return {
                 "description": content[:500],
@@ -132,17 +151,17 @@ class CompanyScraper:
         try:
             # Rechercher sur le site avec Firecrawl
             search_results = self.firecrawl.search(
-                f"site:{base_url} {full_name}", params={"limit": 5}
+                f"site:{base_url} {full_name}", limit=5
             )
 
             mentions = []
-
-            for result in search_results.get("results", []):
+            results = getattr(search_results, "results", []) if search_results else []
+            for result in results:
                 mentions.append(
                     {
-                        "title": result.get("title", ""),
-                        "url": result.get("url", ""),
-                        "snippet": result.get("description", ""),
+                        "title": getattr(result, "title", ""),
+                        "url": getattr(result, "url", ""),
+                        "snippet": getattr(result, "description", ""),
                     }
                 )
 
@@ -155,11 +174,15 @@ class CompanyScraper:
     async def _discover_related_pages(self, base_url: str) -> List[Dict[str, str]]:
         """Découvre pages pertinentes (about, leadership, press, media)."""
         try:
-            # Scrape homepage HTML and find likely page links
-            result = self.firecrawl.scrape_url(base_url, params={"formats": ["html", "markdown"], "onlyMainContent": False})
+            # Scrape homepage HTML et trouver les liens pertinents
+            result = self.firecrawl.scrape_url(
+                base_url,
+                params={"formats": ["html", "markdown"], "onlyMainContent": False},
+            )
             html = (result or {}).get("html", "")
             md = (result or {}).get("markdown", "")
             import re
+
             pages = []
             patterns = [
                 r"href=\"([^\"]*about[^\"]*)\"",
@@ -186,43 +209,68 @@ class CompanyScraper:
         except Exception:
             return []
 
-    async def _extract_person_profile(self, base_url: str, pages: List[Dict[str, str]], full_name: str) -> Dict[str, Any]:
+    async def _extract_person_profile(
+        self, base_url: str, pages: List[Dict[str, str]], full_name: str
+    ) -> Dict[str, Any]:
         """Scrape pages pour extraire bio, rôle, image et expériences de la personne."""
-        data: Dict[str, Any] = {"bio": None, "role": None, "image_url": None, "experiences": []}
+        data: Dict[str, Any] = {
+            "bio": None,
+            "role": None,
+            "image_url": None,
+            "experiences": [],
+        }
         try:
             targets = [p["url"] for p in pages] + [base_url]
             for u in targets:
                 try:
-                    result = self.firecrawl.scrape_url(u, params={"formats": ["html", "markdown"], "onlyMainContent": False})
+                    result = self.firecrawl.scrape_url(
+                        u, formats=["html", "markdown"], onlyMainContent=False
+                    )
                 except Exception:
                     continue
-                html = (result or {}).get("html", "")
-                md = (result or {}).get("markdown", "")
+                html = getattr(result, "html", "") if result else ""
+                md = getattr(result, "markdown", "") if result else ""
                 lower = md.lower()
                 if full_name.lower() in lower or full_name.lower().split()[0] in lower:
-                    # Extract bio paragraph containing the name
+                    # Extract bio: paragraphes contenant le nom complet
                     bio = None
                     for para in md.split("\n\n"):
                         if full_name.lower() in para.lower() and len(para) > 50:
                             bio = para.strip()
                             break
-                    # Extract role/title near name
+                    # Extract role: ligne après le nom complet
                     import re
+
                     role = None
-                    role_match = re.search(rf"{re.escape(full_name)}[^\n]*\n([^\n]{{3,80}})", md)
+                    role_match = re.search(
+                        rf"{re.escape(full_name)}[^\n]*\n([^\n]{{3,80}})", md
+                    )
                     if role_match:
                         role = role_match.group(1).strip()
-                    # Fallback: common executive titles on leadership pages
+                    # Fallback: titres exécutifs courants sur les pages de direction
                     if not role:
-                        titles = ["Chief Executive Officer", "CEO", "Chairman", "President", "VP", "Vice President", "General Manager"]
+                        titles = [
+                            "Chief Executive Officer",
+                            "CEO",
+                            "Chairman",
+                            "President",
+                            "VP",
+                            "Vice President",
+                            "General Manager",
+                        ]
                         for t in titles:
                             if t.lower() in lower:
                                 role = t
                                 break
-                    # Extract image from html (img alt includes name or figure near name)
+                    # Extract image from html
                     img = None
-                    for m in re.findall(r"<img[^>]+src=\"([^\"]+)\"[^>]*>", html, flags=re.IGNORECASE):
-                        if full_name.split()[0].lower() in m.lower() or "satya" in m.lower():
+                    for m in re.findall(
+                        r"<img[^>]+src=\"([^\"]+)\"[^>]*>", html, flags=re.IGNORECASE
+                    ):
+                        if (
+                            full_name.split()[0].lower() in m.lower()
+                            or "satya" in m.lower()
+                        ):
                             img = m
                             break
                     # Experiences: naive bullets or lines with years
@@ -230,7 +278,13 @@ class CompanyScraper:
                     for line in md.split("\n"):
                         if re.search(r"\b(20\d{2}|19\d{2})\b", line) and len(line) > 30:
                             experiences.append({"description": line.strip()})
-                    data.update({"bio": bio or data["bio"], "role": role or data["role"], "image_url": img or data["image_url"]})
+                    data.update(
+                        {
+                            "bio": bio or data["bio"],
+                            "role": role or data["role"],
+                            "image_url": img or data["image_url"],
+                        }
+                    )
                     if experiences:
                         data["experiences"] = experiences
             return data

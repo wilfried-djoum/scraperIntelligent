@@ -21,16 +21,18 @@ class LinkedInScraper:
             os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
         except Exception:
             pass
-        api_key = "fc-56bf239c38ed4a1b820ffa50eb758eae"
+        from src.config import config
+
+        api_key = config.FIRECRAWL_API_KEY
         if not api_key:
             raise ValueError("FIRECRAWL_API_KEY non trouvée dans .env")
 
-        # Prefer Firecrawl v2 if available in client
+        # Preferer Firecrawl v2 si disponible dans le client
         try:
             self.firecrawl = FirecrawlApp(api_key=api_key, version="v2")
             print("Firecrawl client initialized with v2")
         except Exception:
-            self.firecrawl = FirecrawlApp(api_key=api_key)
+            self.firecrawl = FirecrawlApp(api_key=config.FIRECRAWL_API_KEY)
             print("Firecrawl client initialized with default version")
         self.last_debug: Dict[str, Any] = {}
         print("LinkedInScraper initialisé")
@@ -70,11 +72,11 @@ class LinkedInScraper:
             posts = await self._scrape_recent_posts(linkedin_url)
 
             # Étape 4: Commentaires (à implémenter plus tard)
-            comments = []  # Optionnel pour la v1
+            comments = []
 
             return {
                 "profile": profile_data,
-                "posts": posts[:10],  # Maximum 10 posts
+                "posts": posts[:10],
                 "comments": comments,
                 "url": linkedin_url,
             }
@@ -125,18 +127,18 @@ class LinkedInScraper:
                 f"https://www.google.com/search?q={search_query.replace(' ', '+')}"
             )
             result = self.firecrawl.scrape_url(
-                search_url, params={"formats": ["markdown"], "onlyMainContent": False}
+                search_url, formats=["markdown"], onlyMainContent=False
             )
+            markdown = getattr(result, "markdown", "") if result else ""
             print(
                 "[Firecrawl RAW Search]",
                 {
                     "url": search_url,
-                    "has_markdown": bool(result and result.get("markdown")),
-                    "markdown_len": len(result.get("markdown", "")) if result else 0,
-                    "keys": list(result.keys()) if isinstance(result, dict) else None,
+                    "has_markdown": bool(markdown),
+                    "markdown_len": len(markdown),
                 },
             )
-            if not result or "markdown" not in result:
+            if not result or not markdown:
                 print("Aucun résultat de recherche")
                 # 3) Fallback: Recherche directe LinkedIn
                 self.last_debug["search_google_used"] = True
@@ -144,7 +146,7 @@ class LinkedInScraper:
                 if found:
                     self.last_debug["search_linkedin_used"] = True
                 return found
-            content = result.get("markdown", "")
+            content = markdown
             linkedin_pattern = r"https?://(?:www\.)?linkedin\.com/in/[\w\-]+"
             matches = re.findall(linkedin_pattern, content)
             if matches:
@@ -178,27 +180,23 @@ class LinkedInScraper:
         try:
             result = self.firecrawl.scrape_url(
                 url,
-                params={
-                    "formats": ["markdown", "html"],
-                    "onlyMainContent": False,
-                    "waitFor": 3000,
-                },
+                formats=["markdown", "html"],
+                onlyMainContent=False,
+                waitFor=3000,
             )
+            markdown = getattr(result, "markdown", "") if result else ""
+            html = getattr(result, "html", "") if result else ""
             print(
                 "[Firecrawl RAW LinkedIn Search]",
                 {
                     "url": url,
-                    "has_markdown": bool(result and result.get("markdown")),
-                    "markdown_len": len(result.get("markdown", "")) if result else 0,
-                    "has_html": bool(result and result.get("html")),
-                    "html_len": len(result.get("html", "")) if result else 0,
+                    "has_markdown": bool(markdown),
+                    "markdown_len": len(markdown),
+                    "has_html": bool(html),
+                    "html_len": len(html),
                 },
             )
-            content = (
-                (result or {}).get("markdown", "")
-                + "\n"
-                + (result or {}).get("html", "")
-            )
+            content = markdown + "\n" + html
             pattern = r"https?://(?:www\.)?linkedin\.com/in/[\w\-]+"
             matches = re.findall(pattern, content)
             if matches:
@@ -237,7 +235,7 @@ class LinkedInScraper:
                     f"{base}/{first}.{last}.{company}/",
                 ]
             )
-        # Remove duplicates while preserving order
+        # Retirer doublons tout en gardant l'ordre
         seen = set()
         ordered = []
         for c in candidates:
@@ -250,22 +248,20 @@ class LinkedInScraper:
         try:
             result = self.firecrawl.scrape_url(
                 url,
-                params={
-                    "formats": ["markdown"],
-                    "onlyMainContent": True,
-                    "waitFor": 1500,
-                },
+                formats=["markdown"],
+                onlyMainContent=True,
+                waitFor=1500,
             )
+            content = getattr(result, "markdown", "") if result else ""
             print(
                 "[Firecrawl RAW Validate]",
                 {
                     "url": url,
-                    "has_markdown": bool(result and result.get("markdown")),
-                    "markdown_len": len(result.get("markdown", "")) if result else 0,
+                    "has_markdown": bool(content),
+                    "markdown_len": len(content),
                 },
             )
-            content = result.get("markdown", "") if result else ""
-            # Heuristic: presence of common LinkedIn terms and name tokens
+            # Heuristic: presence de mots-clés typiques dans le contenu
             if not content or len(content) < 200:
                 return False
             score = 0
@@ -292,32 +288,27 @@ class LinkedInScraper:
             # Scraper avec Firecrawl
             result = self.firecrawl.scrape_url(
                 url,
-                params={
-                    "formats": ["markdown", "html"],
-                    "onlyMainContent": True,
-                    "waitFor": 2000,  # Attendre 2 secondes pour le chargement JS
-                },
+                formats=["markdown", "html"],
+                onlyMainContent=True,
+                waitFor=4000,  # Attendre 4 secondes pour le chargement JS
             )
+            if not result:
+                return {}
+
+            markdown_content = getattr(result, "markdown", "")
+            html_content = getattr(result, "html", "")
+            metadata = getattr(result, "metadata", {})
             print(
                 "[Firecrawl RAW Profile]",
                 {
                     "url": url,
-                    "has_markdown": bool(result and result.get("markdown")),
-                    "markdown_len": len(result.get("markdown", "")) if result else 0,
-                    "has_html": bool(result and result.get("html")),
-                    "html_len": len(result.get("html", "")) if result else 0,
-                    "metadata_keys": (
-                        list((result.get("metadata") or {}).keys()) if result else []
-                    ),
+                    "has_markdown": bool(markdown_content),
+                    "markdown_len": len(markdown_content),
+                    "has_html": bool(html_content),
+                    "html_len": len(html_content),
+                    "metadata_keys": list(metadata.keys()) if metadata else [],
                 },
             )
-
-            if not result:
-                return {}
-
-            markdown_content = result.get("markdown", "")
-            html_content = result.get("html", "")
-            metadata = result.get("metadata", {})
 
             # Parser les informations de base depuis le markdown
             profile_info = self._parse_profile_markdown(markdown_content)
@@ -396,26 +387,23 @@ class LinkedInScraper:
         try:
             result = self.firecrawl.scrape_url(
                 activity_url,
-                params={
-                    "formats": ["markdown"],
-                    "onlyMainContent": True,
-                    "waitFor": 3000,
-                },
+                formats=["markdown"],
+                onlyMainContent=True,
+                waitFor=3000,
             )
+            markdown = getattr(result, "markdown", "") if result else ""
             print(
                 "[Firecrawl RAW Posts]",
                 {
                     "url": activity_url,
-                    "has_markdown": bool(result and result.get("markdown")),
-                    "markdown_len": len(result.get("markdown", "")) if result else 0,
+                    "has_markdown": bool(markdown),
+                    "markdown_len": len(markdown),
                 },
             )
 
-            if not result or "markdown" not in result:
+            if not result or not markdown:
                 print("Impossible de scraper les posts")
                 return []
-
-            markdown = result.get("markdown", "")
 
             # Parser les posts depuis le markdown
             posts = self._parse_posts_from_markdown(markdown)
@@ -469,8 +457,6 @@ class LinkedInScraper:
     async def _scrape_comments(self, posts: List[Dict]) -> List[Dict]:
         """
         Scrape les commentaires sur les posts
-        (Optionnel - complexe à implémenter)
         """
-        # Pour la v1, on peut skip cette fonctionnalité
-        # Car elle nécessite de scraper chaque post individuellement
+        # A faire plus tard
         return []
