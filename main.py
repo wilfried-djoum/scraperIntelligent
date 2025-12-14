@@ -49,10 +49,10 @@ def home():
 async def profiling(data: BaseProfile):
     """
     Endpoint principal de profiling
-    
+
     Args:
         data: BaseProfile avec first_name, last_name, company
-        
+
     Returns:
         Dict avec debug info et profil enrichi complet
     """
@@ -62,5 +62,6 @@ async def profiling(data: BaseProfile):
 
 if __name__ == "__main__":
     import uvicorn
+
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
