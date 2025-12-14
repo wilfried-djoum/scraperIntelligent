@@ -8,7 +8,7 @@ class BaseProfile(BaseModel):
 
     first_name: str
     last_name: str
-    enterprise: str
+    company: str
 
     def getFullName(self):
         return f"{self.first_name} {self.last_name}"
@@ -80,6 +80,7 @@ class ContactInfo(BaseModel):
     twitter: Optional[str] = None
     website: Optional[str] = None
     github: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class EnrichedProfile(BaseModel):
