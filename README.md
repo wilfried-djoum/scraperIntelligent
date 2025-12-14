@@ -25,11 +25,6 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 # http://localhost:8000/static/index.html
 ```
 
-**Déploiement (Vercel/Heroku/Railway):**
-- Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour les instructions détaillées
-- Configuration des variables d'environnement requise
-- Compatible avec Docker (Dockerfile inclus)
-
 ### 2. Code Propre et Structuré
 
 **Qualité du code:**
@@ -49,17 +44,11 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ### 3. Documentation Technique
 
-**Documents fournis:**
-- [README.md](README.md) - Vue d'ensemble et guide de démarrage rapide
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Architecture détaillée et diagrammes
-- Commentaires inline dans le code source
-
 **Couverture:**
 - ✓ Architecture système (patterns, flux de données)
 - ✓ Choix techniques justifiés (Firecrawl, OpenAI, FastAPI)
 - ✓ Limites actuelles documentées
 - ✓ Pistes d'amélioration priorisées
-
 ---
 
 ## Architecture Refactorisée
