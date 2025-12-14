@@ -736,15 +736,15 @@ Génère une synthèse globale au format JSON:
 }"""
 
         user_prompt = f"""Profil à synthétiser:
-Nom: {profile_data.get('first_name')} {profile_data.get('last_name')}
-Entreprise: {profile_data.get('company')}
-Titre: {profile_data.get('headline')}
+Nom: {profile_data.get('first_name', '')} {profile_data.get('last_name', '')}
+Entreprise: {profile_data.get('company', '')}
+Titre: {profile_data.get('headline', '')}
 Résumé: {profile_data.get('summary', '')[:500]}
 Nombre d'expériences: {len(profile_data.get('experiences', []))}
 Publications: {len(profile_data.get('publications', []))}
 Posts LinkedIn: {profile_data.get('linkedin_posts_count', 0)}
 Sources utilisées: {', '.join(sources_used)}
-Score: {profile_data.get('score')}/100
+Score: {profile_data.get('score', 0)}/100
 
 Génère la synthèse globale."""
 

@@ -150,7 +150,7 @@ class ProfileOrchestrator:
             li_result, company_result, social_result
         )
 
-        # Global synthesis
+        # Global synthesis (score sera calculé après)
         synthesis = self._generate_synthesis(
             profile,
             headline,
@@ -159,6 +159,7 @@ class ProfileOrchestrator:
             publications,
             linkedin_analysis,
             sources_used,
+            0,  # score sera mis à jour dans l'assemblage final
         )
 
         return {
@@ -402,6 +403,7 @@ class ProfileOrchestrator:
         publications: list,
         linkedin_analysis: LinkedInAnalysis,
         sources_used: list,
+        score: int = 0,
     ) -> Dict:
         """Génère la synthèse globale via LLM"""
         return self.llm.global_synthesis(
@@ -414,6 +416,7 @@ class ProfileOrchestrator:
                 "experiences": [e.dict() for e in experiences],
                 "publications": publications,
                 "linkedin_posts_count": len(linkedin_analysis.posts),
+                "score": score,
             },
             sources_used,
         )
