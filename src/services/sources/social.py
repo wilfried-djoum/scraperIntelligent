@@ -7,11 +7,12 @@ class SocialScraper:
     """Scraper pour réseaux sociaux professionnels"""
 
     def __init__(self):
+        from src.config import config
         try:
-            self.firecrawl = FirecrawlApp(api_key="fc-56bf239c38ed4a1b820ffa50eb758eae", version="v2")
+            self.firecrawl = FirecrawlApp(api_key=config.FIRECRAWL_API_KEY, version="v2")
             print("Firecrawl v2 enabled for SocialScraper")
         except Exception:
-            self.firecrawl = FirecrawlApp(api_key="fc-56bf239c38ed4a1b820ffa50eb758eae")
+            self.firecrawl = FirecrawlApp(api_key=config.FIRECRAWL_API_KEY)
             print("Firecrawl default version for SocialScraper")
 
     async def scrape(self, profile) -> Dict[str, Any]:
@@ -55,10 +56,10 @@ class SocialScraper:
             )
 
             result = self.firecrawl.scrape_url(
-                search_url, params={"formats": ["markdown"]}
+                search_url, formats=["markdown"]
             )
 
-            content = result.get("markdown", "")
+            content = getattr(result, 'markdown', '') if result else ''
 
             # Extraire URL Twitter
             import re
@@ -85,10 +86,10 @@ class SocialScraper:
             )
 
             result = self.firecrawl.scrape_url(
-                search_url, params={"formats": ["markdown"]}
+                search_url, formats=["markdown"]
             )
 
-            content = result.get("markdown", "")
+            content = getattr(result, 'markdown', '') if result else ''
 
             import re
 
@@ -114,10 +115,10 @@ class SocialScraper:
             )
 
             result = self.firecrawl.scrape_url(
-                search_url, params={"formats": ["markdown"]}
+                search_url, formats=["markdown"]
             )
 
-            content = result.get("markdown", "")
+            content = getattr(result, 'markdown', '') if result else ''
 
             import re
 

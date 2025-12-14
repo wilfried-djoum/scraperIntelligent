@@ -8,11 +8,12 @@ class NewsScraper:
     """Scraper pour articles de presse et mentions médias"""
 
     def __init__(self):
+        from src.config import config
         try:
-            self.firecrawl = FirecrawlApp(api_key="fc-56bf239c38ed4a1b820ffa50eb758eae", version="v2")
+            self.firecrawl = FirecrawlApp(api_key=config.FIRECRAWL_API_KEY, version="v2")
             print("Firecrawl v2 enabled for NewsScraper")
         except Exception:
-            self.firecrawl = FirecrawlApp(api_key="fc-56bf239c38ed4a1b820ffa50eb758eae")
+            self.firecrawl = FirecrawlApp(api_key=config.FIRECRAWL_API_KEY)
             print("Firecrawl default version for NewsScraper")
 
     async def scrape(self, profile) -> Dict[str, Any]:
@@ -47,10 +48,10 @@ class NewsScraper:
             )
 
             result = self.firecrawl.scrape_url(
-                search_url, params={"formats": ["markdown"]}
+                search_url, formats=["markdown"]
             )
 
-            content = result.get("markdown", "")
+            content = getattr(result, 'markdown', '') if result else ''
 
             # Parser les résultats (simplifiés)
             articles = self._parse_news_results(content)
@@ -78,11 +79,11 @@ class NewsScraper:
                 )
 
                 result = self.firecrawl.scrape_url(
-                    search_url, params={"formats": ["markdown"]}
+                    search_url, formats=["markdown"]
                 )
 
                 # Parser et ajouter aux mentions
-                content = result.get("markdown", "")
+                content = getattr(result, 'markdown', '') if result else ''
 
                 if profile.last_name.lower() in content.lower():
                     mentions.append(
