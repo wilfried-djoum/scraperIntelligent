@@ -120,30 +120,37 @@ class ProfileOrchestrator:
             profile, headline, summary, company_result
         )
 
-        # Merge headline/summary après LLM
+        # Merge headline/summary après LLM avec fallbacks
         headline = (
-            headline or structured.get("headline") or llm_enrichment.get("headline")
+            headline or structured.get("headline") or llm_enrichment.get("headline") or 
+            f"Professionnel chez {profile.company}"
         )
-        summary = summary or structured.get("summary") or llm_enrichment.get("summary")
+        summary = (
+            summary or structured.get("summary") or llm_enrichment.get("summary") or 
+            f"{profile.first_name} {profile.last_name} travaille chez {profile.company}."
+        )
 
         # Current role
         current_role = self._extract_current_role(company_result, llm_enrichment)
 
-        # Experiences
+        # Experiences (toujours retourner une liste)
         experiences = self._extract_experiences(
             profile, company_result, structured, llm_enrichment
-        )
+        ) or []
 
-        # Education & Skills
-        education = self._extract_education(structured, llm_enrichment)
-        skills = self._extract_skills(structured, llm_enrichment)
+        # Education & Skills (toujours retourner des listes)
+        education = self._extract_education(structured, llm_enrichment) or []
+        skills = self._extract_skills(structured, llm_enrichment) or []
 
-        # Publications & Speaking
-        publications = self._extract_publications(news_result)
-        speaking_engagements = self._extract_speaking(company_result)
+        # Publications & Speaking (toujours retourner des listes)
+        publications = self._extract_publications(news_result) or []
+        speaking_engagements = self._extract_speaking(company_result) or []
 
-        # LinkedIn posts & analysis
+        # LinkedIn posts & analysis (gérer le cas où None est retourné)
         linkedin_analysis = self._analyze_linkedin_posts(li_result)
+        if linkedin_analysis is None:
+            from src.models.profile import LinkedInAnalysis
+            linkedin_analysis = LinkedInAnalysis(posts=[], themes=[], engagement_level="unknown")
 
         # Contact info
         contact_info = self._extract_contact_info(
@@ -151,16 +158,25 @@ class ProfileOrchestrator:
         )
 
         # Global synthesis (score sera calculé après)
-        synthesis = self._generate_synthesis(
-            profile,
-            headline,
-            summary,
-            experiences,
-            publications,
-            linkedin_analysis,
-            sources_used,
-            0,  # score sera mis à jour dans l'assemblage final
-        )
+        try:
+            synthesis = self._generate_synthesis(
+                profile,
+                headline,
+                summary,
+                experiences,
+                publications,
+                linkedin_analysis,
+                sources_used,
+                0,  # score sera mis à jour dans l'assemblage final
+            )
+        except Exception as e:
+            print(f"Erreur lors de la génération de la synthèse: {e}")
+            synthesis = {
+                "synthesis": f"Profil de {profile.first_name} {profile.last_name} chez {profile.company}. Données limitées disponibles.",
+                "strengths": [],
+                "weak_signals": [],
+                "reliability_justification": "Données limitées pour ce profil."
+            }
 
         return {
             "sources_used": sources_used,
@@ -263,7 +279,7 @@ class ProfileOrchestrator:
         current_role = company_result.get("person_profile", {}).get("role")
         if not current_role and llm_enrichment.get("current_role"):
             current_role = llm_enrichment.get("current_role")
-        return current_role
+        return current_role or "Poste non spécifié"
 
     def _extract_experiences(
         self,
@@ -321,14 +337,16 @@ class ProfileOrchestrator:
         education = (structured.get("education") or []) if structured else []
         if not education and llm_enrichment.get("education"):
             education = llm_enrichment.get("education", [])
-        return education
+        # S'assurer que c'est toujours une liste
+        return education if isinstance(education, list) else []
 
     def _extract_skills(self, structured: Dict, llm_enrichment: Dict) -> list:
         """Extrait les compétences"""
         skills = (structured.get("skills") or []) if structured else []
         if not skills and llm_enrichment.get("skills"):
             skills = llm_enrichment.get("skills", [])
-        return skills
+        # S'assurer que c'est toujours une liste
+        return skills if isinstance(skills, list) else []
 
     def _extract_publications(self, news_result: Dict) -> list:
         """Extrait les publications"""
@@ -354,33 +372,47 @@ class ProfileOrchestrator:
 
     def _analyze_linkedin_posts(self, li_result: Dict) -> LinkedInAnalysis:
         """Analyse les posts LinkedIn"""
-        li_posts_objs = []
-        for p in li_result.get("posts", []) or []:
-            li_posts_objs.append(
-                LinkedInPost(
-                    content=p.get("content", ""),
-                    date=p.get("date"),
-                    url=p.get("url"),
-                )
-            )
+        try:
+            li_posts_objs = []
+            for p in li_result.get("posts", []) or []:
+                try:
+                    li_posts_objs.append(
+                        LinkedInPost(
+                            content=p.get("content", ""),
+                            date=p.get("date"),
+                            url=p.get("url"),
+                        )
+                    )
+                except Exception:
+                    continue
 
-        posts_summary = (
-            self.llm.summarize_posts([p.dict() for p in li_posts_objs])
-            if li_posts_objs
-            else {
+            posts_summary = {
                 "summaries": [],
                 "recurring_themes": [],
                 "overall_tone": None,
                 "posting_frequency": None,
             }
-        )
+            
+            if li_posts_objs:
+                try:
+                    posts_summary = self.llm.summarize_posts([p.dict() for p in li_posts_objs]) or posts_summary
+                except Exception as e:
+                    print(f"Erreur lors de l'analyse des posts LinkedIn: {e}")
 
-        return LinkedInAnalysis(
-            posts=li_posts_objs,
-            recurring_themes=posts_summary.get("recurring_themes", []),
-            overall_tone=posts_summary.get("overall_tone"),
-            posting_frequency=posts_summary.get("posting_frequency"),
-        )
+            return LinkedInAnalysis(
+                posts=li_posts_objs,
+                recurring_themes=posts_summary.get("recurring_themes", []),
+                overall_tone=posts_summary.get("overall_tone"),
+                posting_frequency=posts_summary.get("posting_frequency"),
+            )
+        except Exception as e:
+            print(f"Erreur dans _analyze_linkedin_posts: {e}")
+            return LinkedInAnalysis(
+                posts=[],
+                recurring_themes=[],
+                overall_tone=None,
+                posting_frequency=None,
+            )
 
     def _extract_contact_info(
         self, li_result: Dict, company_result: Dict, social_result: Dict
